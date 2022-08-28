@@ -1,0 +1,57 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: image-dashboard
+  namespace: image-dashboard
+  labels:
+    app: image-dashboard
+spec:
+  jobTemplate:
+    metadata:
+      name: image-dashboard
+      labels:
+        app: image-dashboard
+    spec:
+      template:
+        metadata:
+          labels:
+            app: image-dashboard
+        spec:
+          volumes:
+            - name: image-dashboard
+              persistentVolumeClaim:
+                claimName: image-dashboard
+          containers:
+            - image: ghcr.io/arjunrn/pico-display:main
+              name: image-dashboard
+              env:
+                - name: ICAL_URL
+                  valueFrom:
+                    secretKeyRef:
+                      key: ICAL_URL
+                      name: image-dashboard
+                - name: OPENWEATHER_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      key: OPENWEATHER_API_KEY
+                      name: image-dashboard
+                - name: IMAP_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      key: IMAP_USERNAME
+                      name: image-dashboard
+                - name: IMAP_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: IMAP_PASSWORD
+                      name: image-dashboard
+              volumeMounts:
+                - mountPath: /cache
+                  name: image-dashboard
+              command:
+                - python
+              args:
+                - dashboard.py
+                - --cache-dir=/cache
+          restartPolicy: OnFailure
+  schedule: 0 * * * *
