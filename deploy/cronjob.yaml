@@ -24,6 +24,7 @@ spec:
           containers:
             - image: ghcr.io/arjunrn/pico-display:main
               name: image-dashboard
+              imagePullPolicy: Always
               env:
                 - name: ICAL_URL
                   valueFrom:
