@@ -46,7 +46,7 @@ def make_ts(ical_dt) -> datetime.datetime:
     return ical_dt.astimezone()
 
 
-def cal_image(events):
+def cal_image(events: list[Event]):
     image = Image.new("RGBA", (450, 200), "WHITE")
     event_font = ImageFont.truetype("fonts/FiraCode-Light.ttf", size=15)
     draw = ImageDraw.Draw(image)
@@ -65,7 +65,7 @@ def cal_image(events):
     return image
 
 
-def run() -> Image:
+def run() -> (list[Event], Image):
     ical_url = utils.getenv("ICAL_URL")
     response = requests.get(ical_url)
     if not response.ok:
@@ -78,10 +78,20 @@ def run() -> Image:
             start_time = make_ts(component.get("dtstart").dt)
             end_time = make_ts(component.get("dtend", component.get("dtstart")).dt)
             if start_time > now:
-                summary = component.get("summary")
+                summary = str(component.get("summary"))
                 future_events.append(Event(start_time, end_time, summary))
     future_events = sorted(future_events, key=lambda e: e.start_ts)
-    return cal_image(future_events[:5])
+    selected_events = future_events[:5]
+    events = []
+    for se in selected_events:
+        events.append(
+            {
+                "start_time": se.start_ts.isoformat(),
+                "end_time": se.end_ts.isoformat(),
+                "title": se.summary,
+            }
+        )
+    return events, cal_image(selected_events)
 
 
 if __name__ == "__main__":

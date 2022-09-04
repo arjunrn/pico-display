@@ -53,7 +53,7 @@ def weather_forecast(api_key: str) -> dict:
     return response.json()
 
 
-def run(cache_dir: str) -> Image:
+def run(cache_dir: str) -> (list, Image):
     apikey = utils.getenv("OPENWEATHER_API_KEY")
     weather = get_weather(apikey)
     temperature = weather["main"]["temp"]
@@ -90,6 +90,7 @@ def run(cache_dir: str) -> Image:
     items = len(forecast["list"])
     if items > 6:
         items = 6
+    weather_time = []
     for i in range(items):
         f = forecast["list"][i]
         w_icon = weather_icon(cache_dir, f["weather"][0]["icon"], 4)
@@ -102,17 +103,19 @@ def run(cache_dir: str) -> Image:
         time = ts.astimezone().strftime("%H")
         draw.text((100 * i + 30, 210), text=time, font=font_small, fill="BLACK")
         temp = f["main"]["temp"]
+        temp_str = "{:.1f}°C".format(temp)
         draw.text(
             (100 * i + 15, 130),
-            text="{:.1f}°C".format(temp),
+            text=temp_str,
             font=font_small,
             fill="BLACK",
         )
+        weather_time.append({"temp": temp_str, "time": time})
 
     new_image.convert("RGB")
     new_image = new_image.resize((100, 100))
     image.paste(new_image, (10, 10), new_image)
-    return image
+    return weather_time, image
 
 
 if __name__ == "__main__":
