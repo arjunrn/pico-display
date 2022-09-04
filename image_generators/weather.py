@@ -70,14 +70,13 @@ def run(cache_dir: str) -> (list, Image):
         "fonts/Lora-Regular.ttf", size=25, layout_engine=ImageFont.Layout.RAQM
     )
     draw = ImageDraw.Draw(image)
-    draw.text(
-        (120, 20), text="{:04.2f}°C".format(temperature), font=font_large, fill="PURPLE"
-    )
+    current_temp = "{:04.2f}°C".format(temperature)
+    draw.text((120, 20), text=current_temp, font=font_large, fill="PURPLE")
+    min_temperature = "{:04.2f}°C".format(min_temperature)
+    max_temperature = "{:04.2f}°C".format(max_temperature)
     draw.text(
         (120, 70),
-        text="Min: {:04.2f}°C    Max: {:4.2f} °C".format(
-            min_temperature, max_temperature
-        ),
+        text="Min: {0:s}    Max: {1:s}".format(min_temperature, max_temperature),
         font=font_medium,
         fill="GREEN",
     )
@@ -115,7 +114,13 @@ def run(cache_dir: str) -> (list, Image):
     new_image.convert("RGB")
     new_image = new_image.resize((100, 100))
     image.paste(new_image, (10, 10), new_image)
-    return weather_time, image
+    weather_summary = {
+        "current_temperature": current_temp,
+        "min_temperature": min_temperature,
+        "max_temperature": max_temperature,
+        "prediction": weather_time,
+    }
+    return weather_summary, image
 
 
 if __name__ == "__main__":
